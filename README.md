@@ -1,0 +1,84 @@
+# apple-store-inventory-checker
+Checks Apple Store inventory for new MacBook Pro models.
+
+### Now available as a macOS app!
+This script's functionality is now available as a macOS app! Read more here: [InventoryWatch App by @worthbak](https://worthbak.github.io/inventory-checker-app/)
+
+### Installation 
+Run `npm install` to load the project's dependencies. Assumes recent `node` version (tested with `v17.0.1`, but should work with earlier versions).
+* `request` for simplifying network requests
+* `node-notifier` for sending local notifications when stock is detected
+
+### Running the script
+First, find the store number of your local Apple Store using [the included table](./apple-store-numbers.md) ([see here for Canadian stores](./apple-store-numbers-canada.md)). Then run the script, passing the number as an argument:
+
+```sh
+node index.js R519 DE false
+```
+
+R519 	- Store number
+DE 		- Country code of the store
+false / true - Search nearby stores
+
+This will query Apple's retail inventory for all 2021 MacBook Pro variants that are known to be stocked in-store. `R123` is a store in Nashvile, TN, so that store plus others in the surrouding area will be queried. The results are logged to `stdout`, and if any models are found, a notification will be sent. 
+
+### For other countries
+
+Running the script without a 2nd argument will default to US stores. Adding a second argument specifies the country.
+```sh
+$ node index.js R123 CA
+```
+
+#### Currently Supported Countries
+| Countries         | Argument     |
+| ----------------- | ------------ |
+| United States     | US (default) |
+| Canada            | CA           |
+| Australia         | AU           |
+| Germany           | DE           |
+| United Kingdom    | UK           |
+| South Korea*      | KR           |
+| Hong Kong         | HK           |
+
+\* These countries do not appear to support in-store pickup, and as such may not work with this tool.
+
+### Polling in the background
+You might want this script to run every minute or so, to make sure you don't miss your desired model coming into stock. To run the script repeatedly, update the following line to match your local environment and add it to `crontab`. You will need to update the entry to point to the script directory on your local, your node location (use `which node`), and the desired log output file.
+```sh
+*/1 * * * * cd ~/path/to/script/folder/ && /usr/local/bin/node index.js R123 > ~/path/to/desired/log/script_output.log 2>&1
+```
+
+### Customization 
+This script checks for most known MacBook Pro variants that are currently stocked by Apple Stores, and has some special logic for my personal favorite model (14" M1 Max 32 Core GPU, 64GB RAM, 2TB SSD in both Silver and Space Gray). You may want to tweak the code if you're not interested in the "Ultimate" models.
+
+### Apple Store Query URL Pattern
+For reference, here's how Apple's fulfillment API works.
+
+```
+GET https://www.apple.com/shop/fulfillment-messages
+  ?parts.0=MMQX3LL%2FA  // URL encoded part number MMQX3LL/A
+  &parts.1=MKH53LL%2FA  // URL encoded part number MKH53LL/A
+  &parts.2=MYD92LL%2FA  // URL encoded part number MYD92LL/A
+  ...
+  &searchNearby=true    // Instruct the API to search the designated store and the surrounding area
+  &store=R172           // Store number (R172 is in Boulder, CO)
+```
+
+https://www.apple.com/de/shop/fulfillment-messages?parts.0=MTV53ZD%2FA&parts.1=MTVA3ZD%2FA&searchNearby=true&store=R519
+
+### Useful notes
+
+German models
+
+MTUX3ZD/A		IPhone 15 Pro 	128		Natural
+MTV53ZD/A		IPhone 15 Pro 	256		Natural
+MTV63ZD/A		IPhone 15 Pro	256		Natural
+MTVA3ZD/A		IPhone 15 Pro	512		Blue
+MU7A3ZD/A		IPhone 15 ProMax	256		Blue
+
+Source
+---
+
+https://github.com/worthbak/apple-store-inventory-checker/blob/main/index.js
+https://github.com/worthbak/apple-store-inventory-checker/blob/main/apple-store-numbers-germany.md
+https://iphonechecker.herokuapp.com/de/q/71065/i15Pro
