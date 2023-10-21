@@ -1,3 +1,10 @@
+Based on the apple-store-inventory-checker!!
+
+Script only. Works but sorry for the lack of documentation.
+The code / this readme should help a great deal!
+
+ToDo - Update documentation. 
+
 # apple-store-inventory-checker
 Checks Apple Store inventory for new MacBook Pro models.
 
